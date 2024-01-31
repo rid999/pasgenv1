@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<p style="background-color: Navy; height: 100px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; font-family: 'Roboto', sans-serif; font-size: 50px; font-weight: bold;">Ridwan's Password Generator</p>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: green;
+            color: white;
+            border: none;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            resize: none;
+        }
+
+        table {
+            margin: 0 auto;
+            width: 70%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .copy-icon {
+            cursor: pointer;
+        }
+
+        /* Align description vertically */
+        .password-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Add margin to checkboxes for better spacing */
+        .password-options input[type="checkbox"] {
+            margin-bottom: 5px;
+        }
+
+        /* Password Strength Colors */
+        .weak {
+            background-color: #FFEBEE; /* Red Shade */
+        }
+
+        .medium {
+            background-color: #FFF9C4; /* Yellow Shade */
+        }
+
+        .strong {
+            background-color: #E8F5E9; /* Green Shade */
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Make your own password here...<img src="https://i.gifer.com/5364.gif" alt="animated gif" style="width: 50px;"></img></h3>
+
+
+    <label for="length">Panjang Password</label>
+    <input type="range" id="length" min="12" max="30" value="12" oninput="updateLengthValue()">
+    <span id="lengthValue">12</span>
+
+    <br><br>
+
+    <div class="password-options">
+        <label>Kombinasi Password:</label>
+        <input type="checkbox" id="capitalize" checked>
+        <label for="capitalize">Capitalize</label>
+
+        <input type="checkbox" id="nonCapitalize" checked>
+        <label for="nonCapitalize">Non-Capitalize</label>
+
+        <input type="checkbox" id="mixSymbol" checked>
+        <label for="mixSymbol">Mix Simbol</label>
+    </div>
+
+    <br><br>
+
+    <label for="total">Total Generate Password: </label>
+    <input type="number" id="total" min="1" value="1" style="width: 50px;">
+
+    <br><br>
+
+    <button onclick="generatePassword()">Generate Password</button>
+    <button onclick="copyAllToClipboard()">Copy All Passwords</button>
+    <table id="passwordTable"></table>
+
+    <script>
+        function generatePassword() {
+            const length = document.getElementById('length').value;
+            const capitalize = document.getElementById('capitalize').checked;
+            const nonCapitalize = document.getElementById('nonCapitalize').checked;
+            const mixSymbol = document.getElementById('mixSymbol').checked;
+            const total = document.getElementById('total').value;
+
+            const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
+            const symbolChars = '!@#$%^&*()_-+=<>?';
+
+            let validChars = '';
+
+            // Ensure at least one character from each type is included
+            if (capitalize) validChars += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length));
+            if (nonCapitalize) validChars += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length));
+            if (mixSymbol) validChars += symbolChars.charAt(Math.floor(Math.random() * symbolChars.length));
+
+            // Add additional characters based on user selection
+            if (capitalize) validChars += uppercaseChars;
+            if (nonCapitalize) validChars += lowercaseChars;
+            if (mixSymbol) validChars += symbolChars;
+
+            let passwordTable = '<tr><th style="width : 100px;">Generated Passwords</th><th style="width : 25px;">Password Power</th><th style="width : 25px;">Action</th></tr>';
+
+            for (let i = 0; i < total; i++) {
+                let password = '';
+                for (let j = 0; j < length; j++) {
+                    const randomIndex = Math.floor(Math.random() * validChars.length);
+                    password += validChars.charAt(randomIndex);
+                }
+
+                // Determine password strength
+                let strengthClass = 'weak';
+                if (length >= 14 && capitalize && nonCapitalize && mixSymbol) {
+                    strengthClass = 'strong';
+                } else if (length >= 10 && (capitalize || nonCapitalize || mixSymbol)) {
+                    strengthClass = 'medium';
+                }
+
+                passwordTable += `<tr class="${strengthClass}"><td>${password}</td><td>${strengthClass}</td><td class="copy-icon" onclick="copyToClipboard('${password}')"><i class="fas fa-copy"></i></td></tr>`;
+            }
+
+            document.getElementById('passwordTable').innerHTML = passwordTable;
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Password copied to clipboard!');
+        }
+
+        function updateLengthValue() {
+            const lengthValue = document.getElementById('length').value;
+            document.getElementById('lengthValue').innerText = lengthValue;
+        }
+
+        function copyAllToClipboard() {
+            const passwords = document.querySelectorAll('#passwordTable td:first-child');
+            const allPasswords = Array.from(passwords).map(td => td.textContent).join('\n');
+
+            const textarea = document.createElement('textarea');
+            textarea.value = allPasswords;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('All passwords copied to clipboard!');
+        }
+    </script>
+</body>
+
+</html>
